@@ -111,8 +111,12 @@ def get_sd_long_string(f):
     return f.read(size)
 
 def make_sd_long_string(string):
-    data = make_ui32(len(string))
-    data += string.encode()
+    if isinstance(string, bytes):
+        data=string
+        data+=string
+    else:
+        data = make_ui32(len(string))
+        data += string.encode()
     return data
 
 #ScriptDataDate
@@ -239,7 +243,6 @@ class ScriptObject(object):
                 continue
             position += len(i)
             script.seek(position)
-            # print(script.read(200).decode("ascii"))
             fieldtype = get_ui8(script)
             func = funcs[fieldtype]
             if callable(func):
@@ -276,7 +279,7 @@ class ScriptObject(object):
         out.seek(0)
         self.data = out.read()
         out.close()
-        #pprint.PrettyPrinter().pprint(self.metadata)
+        pprint.PrettyPrinter().pprint(self.metadata)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -386,7 +389,7 @@ def process_flv(output,l):
     for i in l:
         fs.append(open(i, 'rb'))
         h = get_header(fs[len(fs)-1])
-        #print h
+        print h
         if not header:
             header = h
         if h['error'] != None:
@@ -455,9 +458,11 @@ def process_flv(output,l):
                 tag.write(fo)
         except Exception as e:
             if metadata.data.metadata['datasize']:
-                print(datasize,"/",metadata.data.metadata['datasize'][1],"\r", end=' ', file=sys.stderr)
+                pass
+                # print(datasize,"/",metadata.data.metadata['datasize'][1],"\r", end=' ', file=sys.stderr)
             else:
-                print(datasize,"/?","\r", end=' ', file=sys.stderr)
+                pass
+                # print(datasize,"/?","\r", end=' ', file=sys.stderr)
             pass
         finally:
             f.close()
